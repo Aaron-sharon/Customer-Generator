@@ -38,15 +38,26 @@ class Program
 
         GenerateCustomersXml(numCustomers, outputFile);
 
+        var fileInfo = new FileInfo(outputFile);
         Console.WriteLine($"\n✓ Complete! File saved: {outputFile}");
-        Console.WriteLine($"File size: ~{new FileInfo(outputFile).Length / 1024 / 1024} MB");
+        Console.WriteLine($"File size: {fileInfo.Length:N0} bytes ({fileInfo.Length / 1024.0 / 1024.0:F2} MB)");
+
+        // Count lines to verify
+        var lineCount = File.ReadLines(outputFile).Count();
+        Console.WriteLine($"Total lines: {lineCount:N0}");
+        Console.WriteLine($"Expected lines per customer: ~88");
+        Console.WriteLine($"Expected total lines: ~{(numCustomers * 88) + 50:N0}");
+
         Console.WriteLine("\nPress any key to exit...");
         Console.ReadKey();
     }
 
     static void GenerateCustomersXml(int numCustomers, string outputFile)
     {
-        using (var writer = new StreamWriter(outputFile, false, Encoding.UTF8))
+        // ⭐ KEY FIX: Use UTF8Encoding without BOM
+        var utf8WithoutBom = new UTF8Encoding(false); // false = no BOM
+
+        using (var writer = new StreamWriter(outputFile, false, utf8WithoutBom))
         {
             // Write header
             writer.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
